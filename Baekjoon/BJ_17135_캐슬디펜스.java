@@ -1,86 +1,94 @@
-package com.ssafy.day11;
+package com.ssafy.day15;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class BJ_17135_캐슬디펜스 {
-	static class Loc {
-		int x,y;
-		Loc(int x, int y){
-			this.x = x;
-			this.y = y;
-		}
-	}
-	static int n, m, d, max, count;
-	static int[] newArr = new int[3];
-	static ArrayList<Loc> list, original;
+	static int N, M, D, max;
+	static int[] loc = new int[3];
+	static int[][] map, original;
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		n = sc.nextInt();
-		m = sc.nextInt();
-		d = sc.nextInt();
-		original = new ArrayList<>();
-		
-		for(int i = 0; i < n; i++) {
-			for(int j = 0; j < m; j++) {
-				if(sc.nextInt() == 1) {
-					original.add(new Loc(i,j));
-				}
+		N = sc.nextInt();
+		M = sc.nextInt();
+		D = sc.nextInt();
+		map = new int[N+1][M];
+		for(int i = 0; i < N; i++) {
+			for(int j = 0; j < M; j++) {
+				map[i][j] = sc.nextInt();
 			}
+		}
+		original = new int[N+1][M];
+		for(int i = 0; i < N; i++) {
+			System.arraycopy(map[i], 0, original[i], 0, M);
 		}
 		combi(0,0);
 		System.out.println(max);
 	}
-	private static void combi(int cnt, int start) {
+	private static void combi(int start, int cnt) {
 		if(cnt == 3) {
-			list = new ArrayList<>();
-			for(int i = 0; i < original.size(); i++) {
-				list.add(original.get(i));
+			for(int i = 0; i < N; i++) {
+				System.arraycopy(original[i], 0, map[i], 0, M);
 			}
-			count = 0;
-			game();
-			max = Math.max(count, max);
+			max = Math.max(max, game());
 			return;
 		}
-		for(int i = start; i < m; i++) {
-			newArr[cnt] = i;
-			combi(cnt+1, i+1);
+		for(int i = start; i < M; i++) {
+			loc[cnt] = i;
+			combi(i+1, cnt+1);
 		}
 	}
-	private static void game() {
-		for(int t = 0; t < n; t++) {
-			ArrayList<Loc> dead = new ArrayList<>();
+	private static int game() {
+		int result = 0;
+		for(int n = N; n > 0; n--) {
+			int[][] enemy = new int[3][2];
+			for(int i = 0; i < 3; i++) {
+				for(int j = 0; j < 2; j++) {
+					enemy[i][j] = -1;
+				}
+			}
 			for(int k = 0; k < 3; k++) {
+				ArrayList<int[]> list = new ArrayList<>();
+				for(int i = n-1; i >= 0; i--) {
+					for(int j = 0; j < M; j++) {
+						if(map[i][j] == 0) continue;
+						int l = dist(n, loc[k], i, j);
+						if(l <= D) list.add(new int[] {i,j,l});
+					}
+				}
+				if(list.size() == 0) continue;
 				int min = Integer.MAX_VALUE;
-				Loc[] minEnemies = new Loc[list.size()];
-				int[] minEnemies2 = new int[list.size()];
-				int num = 0;
-				Loc enemy = new Loc(-1,-1);
+				int minx = -1, miny = -1;
 				for(int i = 0; i < list.size(); i++) {
-					int temp = n - list.get(i).x + Math.abs(list.get(i).y - newArr[k]);
-					if(temp <= d && min >= temp) {
-						minEnemies[num] = list.get(i);
-						minEnemies2[num++] = temp;
-						min = Math.min(temp, min);
+					if(min >= list.get(i)[2]) {
+						if(min == list.get(i)[2]) {
+							if(list.get(i)[1] < miny) {
+								minx = list.get(i)[0];
+								miny = list.get(i)[1];
+								min = list.get(i)[2];
+							}
+						}else {
+							minx = list.get(i)[0];
+							miny = list.get(i)[1];
+							min = list.get(i)[2];
+						}
 					}
 				}
-				int left = m;
-				for(int i = 0; i < minEnemies.length; i++) {
-					if(minEnemies[i] != null && minEnemies2[i] == min && minEnemies[i].y <= left) {
-						left = Math.min(minEnemies[i].y, left);
-						enemy = minEnemies[i];
-					}
+				enemy[k][0] = minx;
+				enemy[k][1] = miny;
+			}
+			for(int i = 0; i < 3; i++) {
+				if(enemy[i][0] == -1) continue;
+				if(map[enemy[i][0]][enemy[i][1]] != 0) {
+					map[enemy[i][0]][enemy[i][1]] = 0;
+					result++;
 				}
-				if(min != Integer.MAX_VALUE) dead.add(enemy);
-			}
-			for(int i = 0; i < dead.size(); i++) {
-				if(list.remove(dead.get(i))) count++;
-			}
-			for(int i = 0; i < list.size(); i++) {
-				Loc temp = list.get(i);
-				list.remove(temp);
-				if(temp.x+1 < n) list.add(i, new Loc(temp.x+1, temp.y));
 			}
 		}
+		return result;
+	}
+	private static int dist(int x1, int y1, int x2, int y2) {
+		return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 	}
 }
