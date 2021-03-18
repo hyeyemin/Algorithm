@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 public class BJ_2206_벽부수고이동하기 {
 	static int N, M, minDist = Integer.MAX_VALUE;
 	static int[][] map;
+	static boolean[][][] visited;
 	static int[] dx = {-1, 1, 0, 0};
 	static int[] dy = {0, 0, -1, 1};
 	public static void main(String[] args) throws IOException {
@@ -18,6 +19,7 @@ public class BJ_2206_벽부수고이동하기 {
 		N = Integer.parseInt(st.nextToken());
 		M = Integer.parseInt(st.nextToken());
 		map = new int[N][M];
+		visited = new boolean[N][M][2];
 		for(int i = 0; i < N; i++) {
 			String temp = br.readLine();
 			for(int j = 0; j < M; j++) {
@@ -32,6 +34,7 @@ public class BJ_2206_벽부수고이동하기 {
 		Queue<int[]> queue = new LinkedList<>();
 		//x,y,거리,부쉈나
 		queue.add(new int[] {0,0,1,0});
+		visited[0][0][0] = true;
 		
 		while(!queue.isEmpty()) {
 			int[] current = queue.poll();
@@ -46,10 +49,16 @@ public class BJ_2206_벽부수고이동하기 {
 			for(int i = 0; i < 4; i++) {
 				int nx = x + dx[i];
 				int ny = y + dy[i];
-				if(nx < 0 || ny < 0 || nx >= N || ny >= M ) continue;
+				if(nx < 0 || ny < 0 || nx >= N || ny >= M || visited[nx][ny][use]) continue;
 				if(map[nx][ny] == 1 && use == 1) continue;
-				if(map[nx][ny] == 1) queue.add(new int[] {nx, ny, dist+1, 1});
-				else queue.add(new int[] {nx, ny, dist+1, use});
+				if(map[nx][ny] == 1) {
+					queue.add(new int[] {nx, ny, dist+1, 1});
+					visited[nx][ny][1] = true;
+				}
+				else {
+					queue.add(new int[] {nx, ny, dist+1, use});
+					visited[nx][ny][use] = true;
+				}
 			}
 			
 		}
