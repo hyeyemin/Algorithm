@@ -14,7 +14,7 @@ public class BJ_15683_감시 {
 
 		public CCTV(int x, int y, int number) {
 			this.x = x;
-			this.y = y;
+			this.y = y; 
 			this.number = number;
 		}
 	}
